@@ -1,6 +1,6 @@
 # Custom Nginx Modules with Lua
-### Version 1.18.0
-Contains All option from official nginx
+### Version 1.18.0/3cs
+Contains All options from official nginx
 
 Contains the following extra nginx and lua 2.1 modules
 
@@ -13,8 +13,35 @@ Contains the following extra nginx and lua 2.1 modules
 
 ## Prerequisites Notes
 
-- SpiderLabs/ModSecurity installed.
+- [SpiderLabs/ModSecurity installed.](https://github.com/SpiderLabs/ModSecurity)
 - Nginx V 1.18.0, if you are not going to install it via this repo
+
+### required packages
+- libc6-dev 
+- libgd-dev 
+- libpcre3-dev 
+- iptables 
+- perl 
+- unzip 
+- tar 
+- net-tools 
+- dnsutils 
+- libwww-perl 
+- liblwp-protocol-https-perl 
+- apt-utils 
+- autoconf 
+- build-essential  
+- git 
+- libcurl4-openssl-dev 
+- libgeoip-dev 
+- liblmdb-dev 
+- libpcre++-dev 
+- libtool 
+- libxml2-dev 
+- libyajl-dev 
+- pkgconf 
+- wget  
+- zlib1g-dev
 
 ## Installation
 
@@ -24,7 +51,7 @@ cd external/lua-resty-jit
 make install 
 ```
 
-### Configure
+### Configure Nginx
 
 ```sh
 LUAJIT_LIB=/usr/local/bin LUAJIT_INC=/usr/local/include/luajit-2.1 ./configure --add-dynamic-module=dynamic/ModSecurity --add-dynamic-module=external/ngx_devel_kit --add-dynamic-module=external/lua_nginx_module --with-compat
@@ -48,19 +75,25 @@ cd external/lua-resty-redis && make install
 ```
 
 ### Copy Libs
+
+Depending on how you installed nginx, the modules path might change
+Generally installs on /usr/share/nginx/modules/ if you download it via a Package manger
+And /usr/local/nginx/modules/ if you install it from this repo
+
 ```sh
 cp objs/ngx_http_lua_module.so /usr/share/nginx/modules/
 cp objs/ndk_http_module.so /usr/share/nginx/modules/
 cp objs/ngx_http_modsecurity_module.so /usr/share/nginx/modules
 ```
 
-### Add lua jit path to /etc/ld.so.conf
+### Add lua jit path to /etc/ld.so.conf 
+Very Conditional, but this is a suitable method.
 ```sh
 echo "/usr/local/lib" >> /etc/ld.so.conf
 ```
 
 ### Nginx Config
-
+#### Loading the modules
 Before event {} block
 
 ```conf
