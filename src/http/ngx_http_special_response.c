@@ -33,7 +33,7 @@ static u_char ngx_http_error_build_tail[] =
 
 
 static u_char ngx_http_error_tail[] =
-"<hr><center>nginx</center>" CRLF
+"<hr><center>3cs-nginx</center>" CRLF
 "</body>" CRLF
 "</html>" CRLF
 ;
@@ -123,17 +123,17 @@ static char ngx_http_error_402_page[] =
 
 static char ngx_http_error_403_page[] =
 "<html>" CRLF
-"<head><title>403 Forbidden</title></head>" CRLF
+"<head><title>403 Forbidden Entry</title></head>" CRLF
 "<body>" CRLF
-"<center><h1>403 Forbidden</h1></center>" CRLF
+"<center><h1>403 Forbidden Entry</h1></center>" CRLF
 ;
 
 
 static char ngx_http_error_404_page[] =
 "<html>" CRLF
-"<head><title>404 Not Found</title></head>" CRLF
+"<head><title>Not Found</title></head>" CRLF
 "<body>" CRLF
-"<center><h1>404 Not Found</h1></center>" CRLF
+"<center><h1>404 File Not Found</h1></center>" CRLF
 ;
 
 

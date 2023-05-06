@@ -2,6 +2,7 @@
 /*
  * Copyright (C) Igor Sysoev
  * Copyright (C) Nginx, Inc.
+ * Modified by 3cs. / jvcooray@gmail.com
  */
 
 
@@ -11,7 +12,7 @@
 
 #define nginx_version      1018000
 #define NGINX_VERSION      "1.18.0"
-#define NGINX_VER          "nginx/" NGINX_VERSION
+#define NGINX_VER          "3cs-nginx/" NGINX_VERSION
 
 #ifdef NGX_BUILD
 #define NGINX_VER_BUILD    NGINX_VER " (" NGX_BUILD ")"
