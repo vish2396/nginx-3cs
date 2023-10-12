@@ -45,6 +45,8 @@ USE_THREADS=NO
 
 NGX_FILE_AIO=NO
 
+QUIC_BPF=NO
+
 HTTP=YES
 
 NGX_HTTP_LOG_PATH=
@@ -57,18 +59,19 @@ NGX_HTTP_SCGI_TEMP_PATH=
 HTTP_CACHE=YES
 HTTP_CHARSET=YES
 HTTP_GZIP=YES
-HTTP_SSL=NO
+HTTP_SSL=YES
 HTTP_V2=NO
+HTTP_V3=NO
 HTTP_SSI=YES
-HTTP_REALIP=NO
+HTTP_REALIP=YES
 HTTP_XSLT=NO
-HTTP_IMAGE_FILTER=NO
+HTTP_IMAGE_FILTER=YES
 HTTP_SUB=NO
 HTTP_ADDITION=NO
 HTTP_DAV=NO
 HTTP_ACCESS=YES
 HTTP_AUTH_BASIC=YES
-HTTP_AUTH_REQUEST=NO
+HTTP_AUTH_REQUEST=YES
 HTTP_MIRROR=YES
 HTTP_USERID=YES
 HTTP_SLICE=NO
@@ -76,7 +79,7 @@ HTTP_AUTOINDEX=YES
 HTTP_RANDOM_INDEX=NO
 HTTP_STATUS=NO
 HTTP_GEO=YES
-HTTP_GEOIP=NO
+HTTP_GEOIP=YES
 HTTP_MAP=YES
 HTTP_SPLIT_CLIENTS=YES
 HTTP_REFERER=YES
@@ -92,12 +95,12 @@ HTTP_LIMIT_CONN=YES
 HTTP_LIMIT_REQ=YES
 HTTP_EMPTY_GIF=YES
 HTTP_BROWSER=YES
-HTTP_SECURE_LINK=NO
+HTTP_SECURE_LINK=YES
 HTTP_DEGRADATION=NO
 HTTP_FLV=NO
 HTTP_MP4=NO
-HTTP_GUNZIP=NO
-HTTP_GZIP_STATIC=NO
+HTTP_GUNZIP=YES
+HTTP_GZIP_STATIC=YES
 HTTP_UPSTREAM_HASH=YES
 HTTP_UPSTREAM_IP_HASH=YES
 HTTP_UPSTREAM_LEAST_CONN=YES
@@ -124,6 +127,7 @@ STREAM_GEOIP=NO
 STREAM_MAP=YES
 STREAM_SPLIT_CLIENTS=YES
 STREAM_RETURN=YES
+STREAM_SET=YES
 STREAM_UPSTREAM_HASH=YES
 STREAM_UPSTREAM_LEAST_CONN=YES
 STREAM_UPSTREAM_RANDOM=YES
@@ -131,8 +135,10 @@ STREAM_UPSTREAM_ZONE=YES
 STREAM_SSL_PREREAD=NO
 
 DYNAMIC_MODULES=
+DYNAMIC_MODULES_SRCS=
 
 NGX_ADDONS=
+NGX_ADDON_SRCS=
 NGX_ADDON_DEPS=
 DYNAMIC_ADDONS=
 
@@ -143,8 +149,10 @@ PCRE=NONE
 PCRE_OPT=
 PCRE_CONF_OPT=
 PCRE_JIT=NO
+PCRE2=YES
 
 USE_OPENSSL=NO
+USE_OPENSSL_QUIC=NO
 OPENSSL=NONE
 
 USE_ZLIB=NO
@@ -157,10 +165,12 @@ NGX_PERL=perl
 
 USE_LIBXSLT=NO
 USE_LIBGD=NO
-USE_GEOIP=NO
+USE_GEOIP=YES
 
-NGX_GOOGLE_PERFTOOLS=NO
+NGX_GOOGLE_PERFTOOLS=YES
 NGX_CPP_TEST=NO
+
+SO_COOKIE_FOUND=NO
 
 NGX_LIBATOMIC=NO
 
@@ -207,6 +217,8 @@ do
 
         --with-file-aio)                 NGX_FILE_AIO=YES           ;;
 
+        --without-quic_bpf_module)       QUIC_BPF=NONE              ;;
+
         --with-ipv6)
             NGX_POST_CONF_MSG="$NGX_POST_CONF_MSG
 $0: warning: the \"--with-ipv6\" option is deprecated"
@@ -222,27 +234,28 @@ $0: warning: the \"--with-ipv6\" option is deprecated"
         --http-uwsgi-temp-path=*)        NGX_HTTP_UWSGI_TEMP_PATH="$value" ;;
         --http-scgi-temp-path=*)         NGX_HTTP_SCGI_TEMP_PATH="$value" ;;
 
-        --with-http_ssl_module)          HTTP_SSL=YES               ;;
+        --without-http_ssl_module)       HTTP_SSL=NO                ;;
         --with-http_v2_module)           HTTP_V2=YES                ;;
-        --with-http_realip_module)       HTTP_REALIP=YES            ;;
+        --with-http_v3_module)           HTTP_V3=YES                ;;
+        --without-http_realip_module)    HTTP_REALIP=NO             ;;
         --with-http_addition_module)     HTTP_ADDITION=YES          ;;
         --with-http_xslt_module)         HTTP_XSLT=YES              ;;
         --with-http_xslt_module=dynamic) HTTP_XSLT=DYNAMIC          ;;
-        --with-http_image_filter_module) HTTP_IMAGE_FILTER=YES      ;;
+        --without-http_image_filter_module) HTTP_IMAGE_FILTER=NO    ;;
         --with-http_image_filter_module=dynamic)
                                          HTTP_IMAGE_FILTER=DYNAMIC  ;;
-        --with-http_geoip_module)        HTTP_GEOIP=YES             ;;
+        --without-http_geoip_module)     HTTP_GEOIP=NO             ;;
         --with-http_geoip_module=dynamic)
                                          HTTP_GEOIP=DYNAMIC         ;;
         --with-http_sub_module)          HTTP_SUB=YES               ;;
         --with-http_dav_module)          HTTP_DAV=YES               ;;
         --with-http_flv_module)          HTTP_FLV=YES               ;;
         --with-http_mp4_module)          HTTP_MP4=YES               ;;
-        --with-http_gunzip_module)       HTTP_GUNZIP=YES            ;;
-        --with-http_gzip_static_module)  HTTP_GZIP_STATIC=YES       ;;
-        --with-http_auth_request_module) HTTP_AUTH_REQUEST=YES      ;;
+        --without-http_gunzip_module)    HTTP_GUNZIP=NO             ;;
+        --without-http_gzip_static_module)  HTTP_GZIP_STATIC=NO     ;;
+        --without-http_auth_request_module) HTTP_AUTH_REQUEST=NO    ;;
         --with-http_random_index_module) HTTP_RANDOM_INDEX=YES      ;;
-        --with-http_secure_link_module)  HTTP_SECURE_LINK=YES       ;;
+        --without-http_secure_link_module) HTTP_SECURE_LINK=NO      ;;
         --with-http_degradation_module)  HTTP_DEGRADATION=YES       ;;
         --with-http_slice_module)        HTTP_SLICE=YES             ;;
 
@@ -324,6 +337,7 @@ use the \"--with-mail_ssl_module\" option instead"
         --without-stream_split_clients_module)
                                          STREAM_SPLIT_CLIENTS=NO    ;;
         --without-stream_return_module)  STREAM_RETURN=NO           ;;
+        --without-stream_set_module)     STREAM_SET=NO              ;;
         --without-stream_upstream_hash_module)
                                          STREAM_UPSTREAM_HASH=NO    ;;
         --without-stream_upstream_least_conn_module)
@@ -333,7 +347,7 @@ use the \"--with-mail_ssl_module\" option instead"
         --without-stream_upstream_zone_module)
                                          STREAM_UPSTREAM_ZONE=NO    ;;
 
-        --with-google_perftools_module)  NGX_GOOGLE_PERFTOOLS=YES   ;;
+        --without-google_perftools_module)  NGX_GOOGLE_PERFTOOLS=NO ;;
         --with-cpp_test_module)          NGX_CPP_TEST=YES           ;;
 
         --add-module=*)                  NGX_ADDONS="$NGX_ADDONS $value" ;;
@@ -353,6 +367,7 @@ use the \"--with-mail_ssl_module\" option instead"
         --with-pcre=*)                   PCRE="$value"              ;;
         --with-pcre-opt=*)               PCRE_OPT="$value"          ;;
         --with-pcre-jit)                 PCRE_JIT=YES               ;;
+        --without-pcre2)                 PCRE2=DISABLED             ;;
 
         --with-openssl=*)                OPENSSL="$value"           ;;
         --with-openssl-opt=*)            OPENSSL_OPT="$value"       ;;
@@ -437,13 +452,16 @@ cat << END
 
   --with-file-aio                    enable file AIO support
 
-  --with-http_ssl_module             enable ngx_http_ssl_module
+  --without-quic_bpf_module          disable ngx_quic_bpf_module
+
+  --without-http_ssl_module          disable ngx_http_ssl_module
   --with-http_v2_module              enable ngx_http_v2_module
-  --with-http_realip_module          enable ngx_http_realip_module
+  --with-http_v3_module              enable ngx_http_v3_module
+  --without-http_realip_module       disable ngx_http_realip_module
   --with-http_addition_module        enable ngx_http_addition_module
   --with-http_xslt_module            enable ngx_http_xslt_module
   --with-http_xslt_module=dynamic    enable dynamic ngx_http_xslt_module
-  --with-http_image_filter_module    enable ngx_http_image_filter_module
+  --without-http_image_filter_module disable ngx_http_image_filter_module
   --with-http_image_filter_module=dynamic
                                      enable dynamic ngx_http_image_filter_module
   --with-http_geoip_module           enable ngx_http_geoip_module
@@ -452,11 +470,11 @@ cat << END
   --with-http_dav_module             enable ngx_http_dav_module
   --with-http_flv_module             enable ngx_http_flv_module
   --with-http_mp4_module             enable ngx_http_mp4_module
-  --with-http_gunzip_module          enable ngx_http_gunzip_module
-  --with-http_gzip_static_module     enable ngx_http_gzip_static_module
-  --with-http_auth_request_module    enable ngx_http_auth_request_module
+  --without-http_gunzip_module       disable ngx_http_gunzip_module
+  --without-http_gzip_static_module  disable ngx_http_gzip_static_module
+  --without-http_auth_request_module disable ngx_http_auth_request_module
   --with-http_random_index_module    enable ngx_http_random_index_module
-  --with-http_secure_link_module     enable ngx_http_secure_link_module
+  --without-http_secure_link_module  disable ngx_http_secure_link_module
   --with-http_degradation_module     enable ngx_http_degradation_module
   --with-http_slice_module           enable ngx_http_slice_module
   --with-http_stub_status_module     enable ngx_http_stub_status_module
@@ -538,6 +556,7 @@ cat << END
   --without-stream_split_clients_module
                                      disable ngx_stream_split_clients_module
   --without-stream_return_module     disable ngx_stream_return_module
+  --without-stream_set_module        disable ngx_stream_set_module
   --without-stream_upstream_hash_module
                                      disable ngx_stream_upstream_hash_module
   --without-stream_upstream_least_conn_module
@@ -547,7 +566,7 @@ cat << END
   --without-stream_upstream_zone_module
                                      disable ngx_stream_upstream_zone_module
 
-  --with-google_perftools_module     enable ngx_google_perftools_module
+  --without-google_perftools_module  disable ngx_google_perftools_module
   --with-cpp_test_module             enable ngx_cpp_test_module
 
   --add-module=PATH                  enable external module
@@ -568,6 +587,7 @@ cat << END
   --with-pcre=DIR                    set path to PCRE library sources
   --with-pcre-opt=OPTIONS            set additional build options for PCRE
   --with-pcre-jit                    build PCRE with JIT compilation support
+  --without-pcre2                    do not use PCRE2 library
 
   --with-zlib=DIR                    set path to zlib library sources
   --with-zlib-opt=OPTIONS            set additional build options for zlib
@@ -594,9 +614,9 @@ if [ ".$NGX_PLATFORM" = ".win32" ]; then
 fi
 
 
-NGX_SBIN_PATH=${NGX_SBIN_PATH:-sbin/nginx}
+NGX_SBIN_PATH=${NGX_SBIN_PATH:-/usr/sbin/nginx}
 NGX_MODULES_PATH=${NGX_MODULES_PATH:-modules}
-NGX_CONF_PATH=${NGX_CONF_PATH:-conf/nginx.conf}
+NGX_CONF_PATH=${NGX_CONF_PATH:-nginx.conf}
 NGX_CONF_PREFIX=`dirname $NGX_CONF_PATH`
 NGX_PID_PATH=${NGX_PID_PATH:-logs/nginx.pid}
 NGX_LOCK_PATH=${NGX_LOCK_PATH:-logs/nginx.lock}

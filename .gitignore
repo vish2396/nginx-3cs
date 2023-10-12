@@ -1,2 +1,19 @@
 Dockerfile
 docker-compose.yml
+
+.DS_Store
+
+# GNU Junk
+
+#auto
+#conf
+#contrib
+#docs
+#.hgtags
+#misc
+#src
+
+modules/
+
+Makefile
+objs/
